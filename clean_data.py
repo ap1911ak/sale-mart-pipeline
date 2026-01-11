@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import datetime
 
 def clean_data():
     source_dir = 'Raw_zone'
@@ -27,6 +28,8 @@ def clean_data():
 
     # fill missing values in sales.csv with 1
     df_sales = pd.read_csv(sales_path)
+    df_sales['date'] = pd.to_datetime(df_sales['date'], dayfirst=True, errors='coerce')
+    print(df_sales['date'].dtype)
     df_sales['quantity'].fillna(1, inplace=True)
 
 
@@ -42,7 +45,5 @@ def clean_data():
     df_promot.to_csv(clean_promot_path, index=False)
     df_store.to_csv(clean_store_path, index=False)
     
-
-
 if __name__ == "__main__":
     clean_data()
