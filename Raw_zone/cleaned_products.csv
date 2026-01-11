@@ -1,7 +1,7 @@
 product_id,product_name,category,price
 101,Milk,Dairy,45.0
 102,Bread,Bakery,30.0
-103,Eggs,Dairy,
+103,Eggs,Dairy,45.0
 104,Rice,Grain,150.0
 105,Chicken,Meat,120.0
 106,Apple,Fruit,25.0
