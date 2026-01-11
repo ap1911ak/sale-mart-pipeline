@@ -1,0 +1,35 @@
+import pandas as pd
+import os
+
+def load_data():
+    source_dir = 'Raw_zone'
+    dest_dir = 'Serving_zone'
+    files = [f for f in os.listdir(source_dir) if f.endswith('.csv') and f.startswith('cleaned_')]
+
+    if not os.path.exists(dest_dir):
+        os.makedirs(dest_dir)
+
+    sales = pd.read_csv(f'{source_dir}/cleaned_sales.csv')
+    products = pd.read_csv(f'{source_dir}/cleaned_products.csv')
+    stores = pd.read_csv(f'{source_dir}/cleaned_stores.csv')
+
+    # Create master sales data by merging sales with products and stores
+    master_table = sales.merge(products, on='product_id', how='left') \
+                        .merge(stores, on='store_id', how='left') \
+
+    # Calculate total revenue 
+    master_table['total_revenue'] = master_table['quantity'] * master_table['price']                        
+
+    # Add date-related features
+    master_table['date'] = pd.to_datetime(master_table['date'])
+    master_table['day_of_week'] = master_table['date'].dt.dayofweek
+    master_table['day'] = master_table['date'].dt.day_name()
+    master_table['is_weekend'] = master_table['date'].dt.dayofweek >= 5
+
+    print(master_table)
+
+    master_table.to_csv(f'{dest_dir}/master_sales_data.csv', index=False)
+
+
+if __name__ == "__main__":
+    load_data()
