@@ -1,0 +1,5 @@
+2026-01-11 23:50:03,057 - INFO - --- Data Pipeline Started ---
+2026-01-11 23:50:03,108 - INFO - Extraction Step: SUCCESS
+2026-01-11 23:50:03,129 - INFO - Cleaning Step: SUCCESS
+2026-01-11 23:50:03,154 - INFO - Loading Step: SUCCESS
+2026-01-11 23:50:03,154 - INFO - --- Pipeline Finished Successfully (Duration: 0:00:00.096833) ---
