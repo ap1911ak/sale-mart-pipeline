@@ -41,6 +41,7 @@ def clean_data():
     df_invent.to_csv(clean_invent_path, index=False)
     df_promot.to_csv(clean_promot_path, index=False)
     df_store.to_csv(clean_store_path, index=False)
+    
 
 
 if __name__ == "__main__":
