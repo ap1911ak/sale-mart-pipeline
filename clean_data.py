@@ -20,7 +20,8 @@ def clean_data():
 
     # fill missing values in products.csv with 'AVG VALUE'
     df_prod = pd.read_csv(prod_path)
-    df_prod.fillna(df_prod.groupby('category')['price'].transform('mean'), inplace=True)
+    df_prod['price'].fillna(df_prod.groupby('category')['price'].transform('mean'), inplace=True)
+    print(df_prod.groupby('category')['price'].transform('mean'))
 
     # fill missing values in customers.csv with 'Unknown'
     df_cust = pd.read_csv(cust_path)
@@ -28,8 +29,6 @@ def clean_data():
 
     # fill missing values in sales.csv with 1
     df_sales = pd.read_csv(sales_path)
-    df_sales['date'] = pd.to_datetime(df_sales['date'], dayfirst=True, errors='coerce')
-    print(df_sales['date'].dtype)
     df_sales['quantity'].fillna(1, inplace=True)
 
 
