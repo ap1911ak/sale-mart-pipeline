@@ -1,4 +1,4 @@
-transaction_id,date,product_id,store_id,customer_id,quantity,product_name,category,price,store_name,region,total_revenue,day_of_week,day,is_weekend
+Transaction Id,Date,Product Id,Store Id,Customer Id,Qty,Product Name,Category,Price,Store Name,Region,Total Revenue,Day Of Week,Day,Is Weekend
 T1001,2025-01-04,102,2,506,4.0,Bread,Bakery,30.0,Chiang Mai North,North,120.0,5,Saturday,True
 T1002,2025-01-02,103,1,504,4.0,Eggs,Dairy,45.0,Bangkok Central,Central,180.0,3,Thursday,False
 T1003,2025-01-03,101,3,508,3.0,Milk,Dairy,45.0,Phuket South,South,135.0,4,Friday,False
