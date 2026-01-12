@@ -26,10 +26,19 @@ def load_data():
     master_table['day'] = master_table['date'].dt.day_name()
     master_table['is_weekend'] = master_table['date'].dt.dayofweek >= 5
 
+    #call formatting function
+    master_table = format_header(master_table)
+
+    # Rename columns for clarity
+    master_table = master_table.rename(columns={'Quantity': 'Qty'})
     print(master_table)
 
     master_table.to_csv(f'{dest_dir}/master_sales_data.csv', index=False)
 
+# formatting header to title case anf replacing underscores with spaces
+def format_header(df):
+    df.columns = [col.replace('_',' ').title() for col in df.columns]
+    return df
 
 if __name__ == "__main__":
     load_data()
