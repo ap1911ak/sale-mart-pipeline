@@ -1,0 +1,94 @@
+version: '3.8'
+services:
+  # ฐานข้อมูลสำหรับเก็บ Metadata ของ Airflow
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ตัวกลางส่งข้อมูลระหว่าง Scheduler และ Worker
+  redis:
+    image: redis:6.2-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 30s
+      retries: 50
+
+  # ส่วนกลางที่ใช้ร่วมกัน (เพื่อลดความซ้ำซ้อนของโค้ด)
+  airflow-common:
+    build: . # สั่งให้ไปรัน Dockerfile ในเครื่องเรา
+    image: supermarket-airflow-custom:latest
+    environment:
+      &airflow-common-env
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
+      AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
+      AIRFLOW__CORE__FERNET_KEY: ''
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false' # ปิดตัวอย่าง DAGs ที่แถมมา
+      AIRFLOW_UID: ${AIRFLOW_UID:-50000}
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./scripts:/opt/airflow/scripts
+      - ./data:/opt/airflow/data # สำคัญมาก: เชื่อมที่เก็บ CSV ของเรา
+      - ./logs:/opt/airflow/logs
+    user: "${AIRFLOW_UID:-50000}:0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # หน้าจอ Web UI (เข้าผ่าน http://localhost:8080)
+  airflow-webserver:
+    <<: *airflow-common-env
+    image: supermarket-airflow-custom:latest
+    container_name: airflow-webserver
+    command: webserver
+    ports:
+      - "8080:8080"
+    depends_on:
+      airflow-common:
+        condition: service_started
+
+  # ตัวควบคุมคิวงานและจัดการตารางเวลา
+  airflow-scheduler:
+    <<: *airflow-common-env
+    image: supermarket-airflow-custom:latest
+    container_name: airflow-scheduler
+    command: scheduler
+    depends_on:
+      airflow-common:
+        condition: service_started
+
+  # ตัวรันงานจริง (Worker)
+  airflow-worker:
+    <<: *airflow-common-env
+    image: supermarket-airflow-custom:latest
+    container_name: airflow-worker
+    command: celery worker
+    depends_on:
+      airflow-common:
+        condition: service_started
+
+  # ตัวเตรียมระบบ (รันครั้งเดียวจบ)
+  airflow-init:
+    <<: *airflow-common-env
+    image: supermarket-airflow-custom:latest
+    container_name: airflow-init
+    command: version
+    environment:
+      <<: *airflow-common-env
+      _AIRFLOW_DB_UPGRADE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: airflow
+      _AIRFLOW_WWW_USER_PASSWORD: airflow
