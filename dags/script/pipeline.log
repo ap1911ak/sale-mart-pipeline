@@ -1,0 +1,22 @@
+2026-01-11 23:50:03,057 - INFO - --- Data Pipeline Started ---
+2026-01-11 23:50:03,108 - INFO - Extraction Step: SUCCESS
+2026-01-11 23:50:03,129 - INFO - Cleaning Step: SUCCESS
+2026-01-11 23:50:03,154 - INFO - Loading Step: SUCCESS
+2026-01-11 23:50:03,154 - INFO - --- Pipeline Finished Successfully (Duration: 0:00:00.096833) ---
+2026-01-12 09:31:38,398 - INFO - --- Data Pipeline Started ---
+2026-01-12 09:31:38,477 - INFO - Extraction Step: SUCCESS
+2026-01-12 09:31:38,509 - INFO - Cleaning Step: SUCCESS
+2026-01-12 09:31:38,538 - INFO - Loading Step: SUCCESS
+2026-01-12 09:31:38,538 - INFO - --- Pipeline Finished Successfully (Duration: 0:00:00.139667) ---
+2026-01-13 21:54:23,401 - INFO - --- Data Pipeline Started ---
+2026-01-13 21:54:23,402 - ERROR - Pipeline FAILED at some stage: [WinError 3] The system cannot find the path specified: 'Landing_zone'
+2026-01-13 21:55:56,610 - INFO - --- Data Pipeline Started ---
+2026-01-13 21:55:56,611 - ERROR - Pipeline FAILED at some stage: [WinError 3] The system cannot find the path specified: 'Landing_zone'
+2026-01-13 21:56:30,710 - INFO - --- Data Pipeline Started ---
+2026-01-13 21:56:30,710 - ERROR - Pipeline FAILED at some stage: [WinError 3] The system cannot find the path specified: 'Landing_zone'
+2026-01-13 21:56:38,314 - INFO - --- Data Pipeline Started ---
+2026-01-13 21:56:38,314 - ERROR - Pipeline FAILED at some stage: [WinError 3] The system cannot find the path specified: 'Landing_zone'
+2026-01-13 22:00:11,592 - INFO - --- Data Pipeline Started ---
+2026-01-13 22:00:11,593 - ERROR - Pipeline FAILED at some stage: [WinError 3] The system cannot find the path specified: '/opt/airflow/data\\Landing_zone'
+2026-01-13 22:03:29,385 - INFO - --- Data Pipeline Started ---
+2026-01-13 22:03:29,385 - ERROR - Pipeline FAILED at some stage: [WinError 3] The system cannot find the path specified: '/opt/airflow/data/Landing_zone'

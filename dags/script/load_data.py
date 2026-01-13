@@ -1,9 +1,14 @@
 import pandas as pd
 import os
+BASE_DATA_PATH = "/opt/airflow/data"
+
+LANDING_DIR = f"{BASE_DATA_PATH}/Landing_zone"
+RAW_DIR = f"{BASE_DATA_PATH}/Raw_zone"
+SERVING_DIR = f"{BASE_DATA_PATH}/Serving_zone"
 
 def load_data():
-    source_dir = 'Raw_zone'
-    dest_dir = 'Serving_zone'
+    source_dir = RAW_DIR
+    dest_dir = SERVING_DIR
     files = [f for f in os.listdir(source_dir) if f.endswith('.csv') and f.startswith('cleaned_')]
 
     if not os.path.exists(dest_dir):

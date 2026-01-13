@@ -1,10 +1,11 @@
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.operators.python_operator import PythonOperator
 from datetime import datetime, timedelta
 
-import extract  
-import clean_data as clean
-import load_data as load
+from script.extract import extract
+from script.check_data import check_data
+from script.clean_data import clean_data
+from script.load_data import load_data
 
 
 default_args = {
@@ -27,19 +28,19 @@ with DAG (
     
     extract_task = PythonOperator(
         task_id='extract_data',
-        python_callable=extract.extract_data,
+        python_callable=extract,
         dag=dag
     )
 
     clean_task = PythonOperator(
         task_id='clean_data',
-        python_callable=clean.clean_data,
+        python_callable=clean_data,
         dag=dag
     )
 
     load_task = PythonOperator(
         task_id='load_data',
-        python_callable=load.load_data,
+        python_callable=load_data,
         dag=dag
     )
 

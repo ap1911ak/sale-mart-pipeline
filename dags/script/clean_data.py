@@ -1,9 +1,17 @@
 import pandas as pd
 import os
 import datetime
+import os
+
+BASE_DATA_PATH = "/opt/airflow/data"
+
+LANDING_DIR = f"{BASE_DATA_PATH}/Landing_zone"
+RAW_DIR = f"{BASE_DATA_PATH}/Raw_zone"
+SERVING_DIR = f"{BASE_DATA_PATH}/Serving_zone"
+
 
 def clean_data():
-    source_dir = 'Raw_zone'
+    source_dir = RAW_DIR
     prod_path = f'{source_dir}/products.csv'
     cust_path = f'{source_dir}/customers.csv'
     sales_path = f'{source_dir}/sales.csv'

@@ -1,6 +1,33 @@
 version: '3.8'
+
+# ประกาศตัวแปรส่วนกลางสำหรับทุก Airflow Services
+x-airflow-common: &airflow-common
+  build: .
+  image: supermarket-airflow-custom:latest
+  environment: &airflow-common-env
+    PYTHONPATH: /opt/airflow
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
+    AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW_UID: ${AIRFLOW_UID:-50000}
+    
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./script:/opt/airflow/script
+    - ./data:/opt/airflow/data
+    - ./logs:/opt/airflow/logs
+  user: "${AIRFLOW_UID:-50000}:0"
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
 services:
-  # ฐานข้อมูลสำหรับเก็บ Metadata ของ Airflow
   postgres:
     image: postgres:13
     environment:
@@ -13,7 +40,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # ตัวกลางส่งข้อมูลระหว่าง Scheduler และ Worker
   redis:
     image: redis:6.2-alpine
     healthcheck:
@@ -22,73 +48,36 @@ services:
       timeout: 30s
       retries: 50
 
-  # ส่วนกลางที่ใช้ร่วมกัน (เพื่อลดความซ้ำซ้อนของโค้ด)
-  airflow-common:
-    build: . # สั่งให้ไปรัน Dockerfile ในเครื่องเรา
-    image: supermarket-airflow-custom:latest
-    environment:
-      &airflow-common-env
-      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
-      AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
-      AIRFLOW__CORE__FERNET_KEY: ''
-      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-      AIRFLOW__CORE__LOAD_EXAMPLES: 'false' # ปิดตัวอย่าง DAGs ที่แถมมา
-      AIRFLOW_UID: ${AIRFLOW_UID:-50000}
-    volumes:
-      - ./dags:/opt/airflow/dags
-      - ./scripts:/opt/airflow/scripts
-      - ./data:/opt/airflow/data # สำคัญมาก: เชื่อมที่เก็บ CSV ของเรา
-      - ./logs:/opt/airflow/logs
-    user: "${AIRFLOW_UID:-50000}:0"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
-  # หน้าจอ Web UI (เข้าผ่าน http://localhost:8080)
   airflow-webserver:
-    <<: *airflow-common-env
-    image: supermarket-airflow-custom:latest
+    <<: *airflow-common
     container_name: airflow-webserver
     command: webserver
     ports:
-      - "8080:8080"
-    depends_on:
-      airflow-common:
-        condition: service_started
+      - "8081:8080"
+    restart: always
 
-  # ตัวควบคุมคิวงานและจัดการตารางเวลา
   airflow-scheduler:
-    <<: *airflow-common-env
-    image: supermarket-airflow-custom:latest
+    <<: *airflow-common
     container_name: airflow-scheduler
     command: scheduler
-    depends_on:
-      airflow-common:
-        condition: service_started
+    restart: always
 
-  # ตัวรันงานจริง (Worker)
   airflow-worker:
-    <<: *airflow-common-env
-    image: supermarket-airflow-custom:latest
+    <<: *airflow-common
     container_name: airflow-worker
     command: celery worker
-    depends_on:
-      airflow-common:
-        condition: service_started
+    restart: always
 
-  # ตัวเตรียมระบบ (รันครั้งเดียวจบ)
+  # แก้ปัญหา Cycle โดยการไม่ใช้ YAML anchor ซ้อนใน environment
   airflow-init:
-    <<: *airflow-common-env
-    image: supermarket-airflow-custom:latest
+    <<: *airflow-common
     container_name: airflow-init
     command: version
     environment:
-      <<: *airflow-common-env
-      _AIRFLOW_DB_UPGRADE: 'true'
-      _AIRFLOW_WWW_USER_CREATE: 'true'
-      _AIRFLOW_WWW_USER_USERNAME: airflow
-      _AIRFLOW_WWW_USER_PASSWORD: airflow
+      - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - _AIRFLOW_DB_UPGRADE=true
+      - _AIRFLOW_WWW_USER_CREATE=true
+      - _AIRFLOW_WWW_USER_USERNAME=airflow
+      - _AIRFLOW_WWW_USER_PASSWORD=airflow
+      
